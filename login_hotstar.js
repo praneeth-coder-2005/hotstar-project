@@ -12,29 +12,35 @@ const puppeteer = require('puppeteer');
         console.log('Navigating to Hotstar login page...');
         await page.goto('https://www.hotstar.com/', { waitUntil: 'networkidle2' });
 
-        // Click the login button
-        console.log('Clicking login button...');
-        await page.waitForSelector('[data-testid="login-button"]');
-        await page.click('[data-testid="login-button"]');
+        // Wait for the page to load fully
+        console.log('Waiting for login button...');
+        await page.waitForTimeout(5000);
 
-        // Enter mobile number
-        console.log('Entering mobile number...');
-        await page.waitForSelector('input[type="tel"]');
-        await page.type('input[type="tel"]', 'YOUR_MOBILE_NUMBER', { delay: 100 }); // Replace with your mobile number
+        // Use an updated selector for the login button
+        const loginButtonSelector = 'button[data-testid="user-menu-btn"]'; // Update this if necessary
+        await page.waitForSelector(loginButtonSelector, { timeout: 60000 });
+        await page.click(loginButtonSelector);
+
+        // Wait and interact with the login modal
+        console.log('Interacting with login modal...');
+        const mobileInputSelector = 'input[type="tel"]';
+        await page.waitForSelector(mobileInputSelector, { timeout: 60000 });
+        await page.type(mobileInputSelector, 'YOUR_MOBILE_NUMBER', { delay: 100 }); // Replace with your mobile number
 
         // Submit the mobile number
-        console.log('Submitting mobile number...');
-        await page.waitForSelector('button[type="submit"]');
-        await page.click('button[type="submit"]');
+        const submitButtonSelector = 'button[type="submit"]';
+        await page.waitForSelector(submitButtonSelector, { timeout: 60000 });
+        await page.click(submitButtonSelector);
 
         // Wait for OTP input
         console.log('Waiting for OTP...');
-        await page.waitForSelector('input[type="tel"][name="otp"]', { timeout: 120000 });
+        const otpInputSelector = 'input[name="otp"]';
+        await page.waitForSelector(otpInputSelector, { timeout: 120000 });
 
-        // **Note**: You must manually input the OTP here or implement an API to fetch OTP
+        // **Note**: Manually enter OTP here in the browser
         console.log('Please enter the OTP manually in the browser.');
 
-        // Wait for user to manually enter the OTP
+        // Wait for user to complete the OTP entry and login
         await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 300000 });
 
         // Save cookies after login
