@@ -1,45 +1,32 @@
-# hotstar_live_recorder.py
-
 import subprocess
-import sys
 
-# URL of the Hotstar stream
-hotstar_url = "https://www.hotstar.com/in/shows/bbs8-24x7-stream-deferred/1271327426/live/watch"
+# Replace this with your Hotstar video URL
+video_url = "https://www.hotstar.com/in/shows/bbs8-24x7-stream-deferred/1271327426/live/watch"
 
-# Path to the Netscape-formatted cookies file
-cookies_file = "netscape.txt"
+# The browser to extract cookies from (e.g., 'chrome', 'firefox', 'edge', etc.)
+browser = "chrome"
 
-def fetch_hls_stream_url():
+# Command to fetch the HLS URL using yt-dlp with browser cookies
+command = [
+    "yt-dlp",
+    "--cookies-from-browser", browser,
+    "-g",  # Only print the URL
+    video_url,
+]
+
+def fetch_hls_url():
     try:
-        # Run yt-dlp to fetch the HLS stream URL
-        result = subprocess.run(
-            ["yt-dlp", "--cookies", cookies_file, "-g", hotstar_url],
-            capture_output=True,
-            text=True,
-            check=True
-        )
-        return result.stdout.strip()
+        # Run the command and capture the output
+        result = subprocess.run(command, capture_output=True, text=True, check=True)
+        hls_url = result.stdout.strip()
+        print(f"Fetched HLS URL: {hls_url}")
+        return hls_url
     except subprocess.CalledProcessError as e:
-        print("Error fetching stream URL:", e.stderr.strip())
-        sys.exit(1)
+        print(f"Error fetching stream URL: {e.stderr}")
+        return None
 
-def record_stream(hls_url, output_file):
-    try:
-        # Record the stream using ffmpeg
-        subprocess.run(
-            ["ffmpeg", "-i", hls_url, "-c", "copy", "-bsf:a", "aac_adtstoasc", output_file],
-            check=True
-        )
-    except subprocess.CalledProcessError as e:
-        print("Error recording stream:", e.stderr.strip())
-        sys.exit(1)
+# Fetch and display the HLS stream URL
+hls_url = fetch_hls_url()
 
-if __name__ == "__main__":
-    print(f"Fetching HLS stream URL for: {hotstar_url}")
-    hls_url = fetch_hls_stream_url()
-    print(f"HLS stream URL fetched: {hls_url}")
-
-    output_file = "recorded_stream.mp4"
-    print(f"Recording stream to file: {output_file}")
-    record_stream(hls_url, output_file)
-    print("Recording complete.")
+if hls_url:
+    print("You can now use this HLS URL with any media player or downloader.")
