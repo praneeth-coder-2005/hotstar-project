@@ -1,66 +1,44 @@
-import os
 import subprocess
-from datetime import datetime
 
-# Temporary directory for recordings
-TMP_DIR = "./tmp"
-os.makedirs(TMP_DIR, exist_ok=True)
-
-def get_stream_url(hotstar_url):
+def fetch_stream_url(cookies_file, hls_stream_url):
     """
-    Use yt-dlp to extract the HLS (.m3u8) stream URL from the Hotstar live stream,
-    including cookies for authentication.
+    Fetches the HLS stream URL from Hotstar using yt-dlp and JSON cookies.
     """
     try:
-        print(f"Fetching HLS stream URL for: {hotstar_url}")
-        command = [
+        print(f"Fetching HLS stream URL for: {hls_stream_url}")
+        yt_dlp_command = [
             "yt-dlp",
-            "--cookies", "hotstar_cookies_netscape.txt",  # Use the Netscape formatted cookies file
-            "-g", hotstar_url
+            "--cookies", cookies_file,
+            "-g", hls_stream_url
         ]
-        hls_url = subprocess.check_output(command, text=True).strip()
-        print(f"Stream URL fetched: {hls_url}")
-        return hls_url
+        # Execute the yt-dlp command and capture output
+        stream_url = subprocess.check_output(yt_dlp_command, text=True).strip()
+        print(f"Stream URL: {stream_url}")
+        return stream_url
     except subprocess.CalledProcessError as e:
-        raise RuntimeError(f"Error fetching stream URL: {e}")
+        print(f"Error fetching stream URL: {e}")
+        return None
 
-def record_stream(hls_url, output_file):
+def save_stream_to_file(stream_url, output_file):
     """
-    Use FFmpeg to record the live stream continuously.
+    Saves the fetched stream URL to an output file.
     """
     try:
-        print(f"Starting recording. Output file: {output_file}")
-        ffmpeg_command = [
-            "ffmpeg", "-y", "-i", hls_url,
-            "-c:v", "copy", "-c:a", "copy",
-            "-f", "mp4", output_file
-        ]
-        subprocess.run(ffmpeg_command, check=True)
-        print(f"Recording completed: {output_file}")
-    except subprocess.CalledProcessError as e:
-        raise RuntimeError(f"FFmpeg recording failed: {e}")
-
-def main():
-    # Hotstar live stream URL
-    hotstar_url = "https://www.hotstar.com/in/shows/bbs8-24x7-stream-deferred/1271327426/live/watch"
-
-    # Fetch the HLS stream URL
-    try:
-        hls_url = get_stream_url(hotstar_url)
-    except Exception as e:
-        print(e)
-        return
-
-    # Prepare the output file name with timestamp
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    output_file = os.path.join(TMP_DIR, f"hotstar_live_{timestamp}.mp4")
-
-    # Start recording
-    try:
-        record_stream(hls_url, output_file)
-        print(f"Recording completed. File saved at: {output_file}")
-    except Exception as e:
-        print(e)
+        print(f"Saving stream URL to file: {output_file}")
+        with open(output_file, 'w') as file:
+            file.write(stream_url)
+        print(f"Stream URL saved successfully to {output_file}")
+    except IOError as e:
+        print(f"Error saving stream URL to file: {e}")
 
 if __name__ == "__main__":
-    main()
+    # Configuration
+    cookies_file = "hotstar_cookies.json"  # JSON file containing cookies
+    hls_stream_url = "https://www.hotstar.com/in/shows/bbs8-24x7-stream-deferred/1271327426/live/watch"
+    output_file = "output.m3u8"  # Adjust the output file name as needed
+
+    # Fetch the stream URL
+    stream_url = fetch_stream_url(cookies_file, hls_stream_url)
+    if stream_url:
+        # Save the stream URL to an output file
+        save_stream_to_file(stream_url, output_file)
