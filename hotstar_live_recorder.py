@@ -15,7 +15,7 @@ def get_stream_url(hotstar_url):
         print(f"Fetching HLS stream URL for: {hotstar_url}")
         command = [
             "yt-dlp",
-            "--cookies", "hotstar_cookies.txt",  # Use the cookies file
+            "--cookies", "hotstar_cookies_netscape.txt",  # Use the Netscape formatted cookies file
             "-g", hotstar_url
         ]
         hls_url = subprocess.check_output(command, text=True).strip()
