@@ -1,9 +1,11 @@
 const puppeteer = require('puppeteer');
 
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 (async () => {
     try {
         const browser = await puppeteer.launch({
-            headless: true, // Set to false to debug visually
+            headless: true, // Set to false for debugging
             args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
 
@@ -14,7 +16,7 @@ const puppeteer = require('puppeteer');
 
         // Wait for the page to load fully
         console.log('Waiting for login button...');
-        await page.waitForTimeout(5000);
+        await delay(5000); // Replace waitForTimeout with a delay function
 
         // Use an updated selector for the login button
         const loginButtonSelector = 'button[data-testid="user-menu-btn"]'; // Update this if necessary
