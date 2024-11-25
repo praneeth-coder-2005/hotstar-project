@@ -1,19 +1,14 @@
 from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
 import time
 
-# Paths to Chrome and ChromeDriver
-chrome_binary_path = "/usr/bin/google-chrome"  # Google Chrome binary path
-chromedriver_path = "/usr/local/bin/chromedriver"  # ChromeDriver binary path
-
 # Set up Chrome options
 options = webdriver.ChromeOptions()
-options.binary_location = chrome_binary_path
-options.add_argument("--start-maximized")  # Start the browser maximized
-options.add_argument("--disable-blink-features=AutomationControlled")  # Avoid detection
+options.add_argument("--start-maximized")
 
-# Initialize WebDriver
-service = Service(executable_path=chromedriver_path)
+# Auto-download the correct ChromeDriver version
+service = Service(ChromeDriverManager().install())
 driver = webdriver.Chrome(service=service, options=options)
 
 try:
@@ -23,9 +18,9 @@ try:
 
     # Wait for manual login
     print("Please log in to your Hotstar account manually. You have 60 seconds.")
-    time.sleep(60)  # Adjust if more time is needed
+    time.sleep(60)
 
-    # Fetch cookies after login
+    # Fetch cookies
     cookies = driver.get_cookies()
     print("Cookies fetched successfully!")
 
