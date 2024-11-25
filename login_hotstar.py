@@ -14,8 +14,8 @@ options.add_argument("--headless")  # Enable headless mode for VPS
 options.add_argument("--no-sandbox")  # Required for running as root
 options.add_argument("--disable-dev-shm-usage")  # Avoid shared memory issues
 
-# Automatically download and use the correct ChromeDriver
-driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+# Correctly initialize WebDriver
+driver = webdriver.Chrome(executable_path=ChromeDriverManager().install(), options=options)
 
 try:
     # Step 1: Open Hotstar
