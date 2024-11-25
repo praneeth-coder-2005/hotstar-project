@@ -6,7 +6,7 @@ import time
 import json
 
 # Your mobile number
-MOBILE_NUMBER = 'your-mobile-number'
+MOBILE_NUMBER = '+917075049676'
 
 # Initialize Chrome in headless mode for VPS
 options = webdriver.ChromeOptions()
@@ -14,8 +14,8 @@ options.add_argument("--headless")  # Enable headless mode for VPS
 options.add_argument("--no-sandbox")  # Required for running as root
 options.add_argument("--disable-dev-shm-usage")  # Avoid shared memory issues
 
-# Correctly initialize WebDriver
-driver = webdriver.Chrome(executable_path=ChromeDriverManager().install(), options=options)
+# Correctly initialize WebDriver using ChromeDriverManager
+driver = webdriver.Chrome(service=webdriver.chrome.service.Service(ChromeDriverManager().install()), options=options)
 
 try:
     # Step 1: Open Hotstar
