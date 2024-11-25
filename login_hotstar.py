@@ -1,20 +1,30 @@
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 import time
 
-# Setup WebDriver
-options = webdriver.ChromeOptions()
-options.add_argument("--start-maximized")
-driver = webdriver.Chrome(options=options)
+# Specify paths
+chrome_binary_path = "/usr/bin/google-chrome"  # Path to your Chrome binary
+chromedriver_path = "/usr/local/bin/chromedriver"  # Path to your ChromeDriver
 
-# Open Hotstar
+# Set up Chrome options
+options = webdriver.ChromeOptions()
+options.binary_location = chrome_binary_path
+options.add_argument("--start-maximized")
+options.add_argument("--disable-blink-features=AutomationControlled")  # Avoid detection
+
+# Initialize WebDriver
+service = Service(chromedriver_path)
+driver = webdriver.Chrome(service=service, options=options)
+
+# Open Hotstar website
 driver.get("https://www.hotstar.com/in")
 
-# Wait for user login
+# Wait for manual login
 print("Please log in to your Hotstar account manually.")
-time.sleep(60)  # Adjust time as needed for login
+time.sleep(60)  # Adjust the sleep duration as needed
 
-# Fetch Cookies
+# Fetch cookies after login
 cookies = driver.get_cookies()
 print("Cookies fetched:")
 for cookie in cookies:
