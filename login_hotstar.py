@@ -2,6 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import time
 import json
@@ -16,27 +17,36 @@ options.add_argument("--no-sandbox")  # Required for running as root
 options.add_argument("--disable-dev-shm-usage")  # Avoid shared memory issues
 
 # Correctly initialize WebDriver using ChromeDriverManager
-driver = webdriver.Chrome(service=webdriver.chrome.service.Service(ChromeDriverManager().install()), options=options)
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
 try:
     # Step 1: Open the direct login page
     driver.get("https://www.hotstar.com/in/mypage#mp-login")
     print("Navigated to Hotstar login page.")
-    time.sleep(5)  # Wait for the page to load
+    time.sleep(5)  # Allow page to load
 
     # Step 2: Enter mobile number
-    mobile_input = WebDriverWait(driver, 20).until(
-        EC.presence_of_element_located((By.ID, "mobileNumber"))  # Adjust ID if incorrect
-    )
-    mobile_input.send_keys(MOBILE_NUMBER)
-    print("Entered mobile number.")
+    try:
+        mobile_input = WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.ID, "mobileNumber"))  # Verify this ID
+        )
+        mobile_input.send_keys(MOBILE_NUMBER)
+        print("Entered mobile number.")
+    except Exception as e:
+        print("Error locating or interacting with the mobile number input field:", e)
+        raise
 
     # Step 3: Submit mobile number
-    continue_button = WebDriverWait(driver, 20).until(
-        EC.presence_of_element_located((By.XPATH, "//button[contains(text(), 'CONTINUE')]"))
-    )
-    continue_button.click()
-    print("Submitted mobile number. Waiting for OTP...")
+    try:
+        continue_button = WebDriverWait(driver, 20).until(
+            EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), 'CONTINUE')]"))
+        )
+        continue_button.click()
+        print("Submitted mobile number. Waiting for OTP...")
+    except Exception as e:
+        print("Error locating or interacting with the 'CONTINUE' button:", e)
+        raise
+
     time.sleep(5)  # Wait for OTP request
 
     # Step 4: Pause for manual OTP entry
@@ -51,7 +61,7 @@ try:
     print("Login successful! Cookies saved to 'hotstar_cookies.json'.")
 
 except Exception as e:
-    print(f"An error occurred: {e}")
+    print(f"An unexpected error occurred: {e}")
 
 finally:
     driver.quit()
