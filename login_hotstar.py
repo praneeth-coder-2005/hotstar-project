@@ -1,6 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 import time
 import json
@@ -18,29 +19,31 @@ options.add_argument("--disable-dev-shm-usage")  # Avoid shared memory issues
 driver = webdriver.Chrome(service=webdriver.chrome.service.Service(ChromeDriverManager().install()), options=options)
 
 try:
-    # Step 1: Open Hotstar
-    driver.get("https://www.hotstar.com/in")
+    # Step 1: Open the direct login page
+    driver.get("https://www.hotstar.com/in/mypage#mp-login")
+    print("Navigated to Hotstar login page.")
     time.sleep(5)  # Wait for the page to load
 
-    # Step 2: Click the login button
-    login_button = driver.find_element(By.XPATH, "//button[contains(text(), 'LOGIN')]")
-    login_button.click()
-    time.sleep(2)  # Wait for the login modal to appear
-
-    # Step 3: Enter mobile number
-    mobile_input = driver.find_element(By.ID, "mobileNumber")  # Update ID based on Hotstar's current DOM
+    # Step 2: Enter mobile number
+    mobile_input = WebDriverWait(driver, 20).until(
+        EC.presence_of_element_located((By.ID, "mobileNumber"))  # Adjust ID if incorrect
+    )
     mobile_input.send_keys(MOBILE_NUMBER)
+    print("Entered mobile number.")
 
-    # Step 4: Submit mobile number
-    continue_button = driver.find_element(By.XPATH, "//button[contains(text(), 'CONTINUE')]")
+    # Step 3: Submit mobile number
+    continue_button = WebDriverWait(driver, 20).until(
+        EC.presence_of_element_located((By.XPATH, "//button[contains(text(), 'CONTINUE')]"))
+    )
     continue_button.click()
-    time.sleep(5)  # Wait for OTP to be sent
+    print("Submitted mobile number. Waiting for OTP...")
+    time.sleep(5)  # Wait for OTP request
 
-    # Step 5: Pause for manual OTP entry
+    # Step 4: Pause for manual OTP entry
     print("Waiting for you to manually enter the OTP in the browser...")
-    time.sleep(30)  # Pause to allow OTP entry
+    time.sleep(30)  # Allow time for manual OTP entry
 
-    # Step 6: Save cookies after login
+    # Step 5: Save cookies after login
     cookies = driver.get_cookies()
     with open("hotstar_cookies.json", "w") as file:
         json.dump(cookies, file)
@@ -51,5 +54,4 @@ except Exception as e:
     print(f"An error occurred: {e}")
 
 finally:
-    # Clean up and close the browser
     driver.quit()
