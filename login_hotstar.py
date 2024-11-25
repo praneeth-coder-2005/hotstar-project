@@ -25,10 +25,21 @@ try:
     print("Navigated to Hotstar login page.")
     time.sleep(5)  # Allow page to load
 
-    # Step 2: Enter mobile number
+    # Step 2: Click the Login button
+    try:
+        login_button = WebDriverWait(driver, 20).until(
+            EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), 'Login')]"))  # Update selector if needed
+        )
+        login_button.click()
+        print("Clicked Login button.")
+    except Exception as e:
+        print("Error locating or clicking the Login button:", e)
+        raise
+
+    # Step 3: Wait for the mobile number input field
     try:
         mobile_input = WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.ID, "mobileNumber"))  # Verify this ID
+            EC.presence_of_element_located((By.ID, "mobileNumber"))  # Update ID if incorrect
         )
         mobile_input.send_keys(MOBILE_NUMBER)
         print("Entered mobile number.")
@@ -36,7 +47,7 @@ try:
         print("Error locating or interacting with the mobile number input field:", e)
         raise
 
-    # Step 3: Submit mobile number
+    # Step 4: Submit mobile number
     try:
         continue_button = WebDriverWait(driver, 20).until(
             EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), 'CONTINUE')]"))
@@ -49,11 +60,11 @@ try:
 
     time.sleep(5)  # Wait for OTP request
 
-    # Step 4: Pause for manual OTP entry
+    # Step 5: Pause for manual OTP entry
     print("Waiting for you to manually enter the OTP in the browser...")
     time.sleep(30)  # Allow time for manual OTP entry
 
-    # Step 5: Save cookies after login
+    # Step 6: Save cookies after login
     cookies = driver.get_cookies()
     with open("hotstar_cookies.json", "w") as file:
         json.dump(cookies, file)
